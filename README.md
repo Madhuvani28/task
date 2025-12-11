@@ -1,39 +1,30 @@
-# Restaurant Management System (Standalone)
+# Menu Management System
 
-This project is a Java-based Restaurant Management System that connects to a MySQL database. It is built with Maven and includes all necessary dependencies in a single executable JAR file.
+This is a **Menu Management System** (formerly Restaurant Manager) built in Java. It allows you to manage a menu database (MySQL) with operations to Add, View, Update, and Delete items.
+
+It is built as a standalone executable JAR using Maven.
 
 ## Prerequisites
 
-1.  **Java Runtime Environment (JRE) or JDK**: Version 17 or higher.
-2.  **MySQL Server**: Ensure your MySQL server is running.
-    *   The app will attempt to connect with user `root` and password `password`.
-    *   If that fails, it will **prompt you** to enter your own credentials.
-    *   It will automatically create the `restaurant_db` database if it doesn't exist.
-
-## How to Build (Optional)
-
-If you have the source code and Maven installed, you can rebuild the project:
-
-```bash
-mvn clean package
-```
-
-This generates `target/restaurant-manager-1.0-SNAPSHOT.jar`.
+1.  **Java Runtime Environment (JRE) or JDK**: Version 17+.
+2.  **MySQL Server**: Running on localhost port 3306.
+    *   The app will try to connect with `root` / `password`.
+    *   If that fails, it will ask for your credentials.
+    *   It automatically creates the database `menu_db` and table `menu_items`.
 
 ## How to Run
 
-You can run the application directly using the JAR file. No external classpath setup is needed.
-
-**Run command:**
+You can run the application directly:
 
 ```bash
 java -jar target/restaurant-manager-1.0-SNAPSHOT.jar
 ```
 
+*Note: The jar name might still be `restaurant-manager` unless you change the artifactId in pom.xml, but the functionality inside is the new Menu Manager.*
+
 ## Features
 
-*   **Insert Restaurant**: Add Name, Cuisine Type, and Rating.
-*   **Read Restaurants**: View all stored restaurants.
-*   **Update Restaurant**: Modify specific fields (Name, Type, Rating) by ID.
-*   **Delete Restaurant**: Remove a restaurant by ID.
-*   **Auto-Configuration**: Automatically prompts for DB credentials if default ones fail.
+*   **Add Item**: Input Item Name and Price.
+*   **View Items**: Shows Serial Number, Name, and Price.
+*   **Update Item**: Update Name or Price by Serial Number.
+*   **Delete Item**: Remove an item by Serial Number.
