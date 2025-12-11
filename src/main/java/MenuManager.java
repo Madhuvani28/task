@@ -6,11 +6,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
 
-public class RestaurantManager {
+public class MenuManager {
 
     // Default connection settings
     private static final String BASE_URL = "jdbc:mysql://localhost:3306/";
-    private static final String DB_NAME = "restaurant_db";
+    private static final String DB_NAME = "menu_db"; // Changed DB name for clarity
     private static final String PARAMS = "?allowPublicKeyRetrieval=true&useSSL=false";
 
     // Mutable credentials
@@ -39,18 +39,18 @@ public class RestaurantManager {
 
         // 3. Menu Loop
         while (true) {
-            System.out.println("\n--- Restaurant Management System ---");
-            System.out.println("1. Insert Restaurant");
-            System.out.println("2. Read All Restaurants");
-            System.out.println("3. Update Restaurant Rating");
-            System.out.println("4. Delete Restaurant");
+            System.out.println("\n--- Menu Management System ---");
+            System.out.println("1. Add Menu Item");
+            System.out.println("2. View All Items");
+            System.out.println("3. Update Menu Item");
+            System.out.println("4. Delete Menu Item");
             System.out.println("5. Exit");
             System.out.print("Enter your choice: ");
 
             int choice = -1;
             try {
                 if (!scanner.hasNextLine())
-                    break; // Prevent crash on EOF
+                    break;
                 String input = scanner.nextLine();
                 if (input.trim().isEmpty())
                     continue;
@@ -62,16 +62,16 @@ public class RestaurantManager {
 
             switch (choice) {
                 case 1:
-                    insertRestaurant(scanner);
+                    addItem(scanner);
                     break;
                 case 2:
-                    readRestaurants();
+                    viewItems();
                     break;
                 case 3:
-                    updateRestaurant(scanner);
+                    updateItem(scanner);
                     break;
                 case 4:
-                    deleteRestaurant(scanner);
+                    deleteItem(scanner);
                     break;
                 case 5:
                     System.out.println("Exiting...");
@@ -140,97 +140,91 @@ public class RestaurantManager {
     }
 
     private static void createTable() {
-        String createTableSQL = "CREATE TABLE IF NOT EXISTS restaurant ("
-                + "id INT AUTO_INCREMENT PRIMARY KEY, "
-                + "name VARCHAR(100) NOT NULL, "
-                + "type VARCHAR(50), "
-                + "rating DOUBLE"
+        // Table: menu_items
+        // Columns: serial_number (PK), item_name, price
+        String createTableSQL = "CREATE TABLE IF NOT EXISTS menu_items ("
+                + "serial_number INT AUTO_INCREMENT PRIMARY KEY, "
+                + "item_name VARCHAR(100) NOT NULL, "
+                + "price DOUBLE NOT NULL"
                 + ")";
 
         try (Connection conn = getConnection();
                 Statement stmt = conn.createStatement()) {
             stmt.execute(createTableSQL);
-            System.out.println("Table 'restaurant' checked/created successfully.");
+            System.out.println("Table 'menu_items' checked/created successfully.");
         } catch (SQLException e) {
             System.err.println("Error creating table: " + e.getMessage());
         }
     }
 
-    private static void insertRestaurant(Scanner scanner) {
-        System.out.print("Enter Restaurant Name: ");
+    private static void addItem(Scanner scanner) {
+        System.out.print("Enter Item Name: ");
         if (!scanner.hasNextLine())
             return;
         String name = scanner.nextLine();
 
-        System.out.print("Enter Cuisine Type: ");
-        if (!scanner.hasNextLine())
-            return;
-        String type = scanner.nextLine();
-
-        double rating = -1;
-        while (rating < 0 || rating > 5) {
-            System.out.print("Enter Rating (0-5): ");
+        double price = -1;
+        while (price < 0) {
+            System.out.print("Enter Price: ");
             try {
                 if (!scanner.hasNextLine())
                     return;
                 String input = scanner.nextLine().trim();
                 if (input.isEmpty())
                     continue;
-                rating = Double.parseDouble(input);
-                if (rating < 0 || rating > 5)
-                    System.out.println("Please enter a value between 0 and 5.");
+                price = Double.parseDouble(input);
+                if (price < 0)
+                    System.out.println("Price cannot be negative.");
             } catch (NumberFormatException e) {
-                System.out.println("Invalid number format.");
+                System.out.println("Invalid price format.");
             }
         }
 
-        String insertSQL = "INSERT INTO restaurant (name, type, rating) VALUES (?, ?, ?)";
-        executeUpdate(insertSQL, name, type, rating);
+        String sql = "INSERT INTO menu_items (item_name, price) VALUES (?, ?)";
+        executeUpdate(sql, name, price);
     }
 
-    private static void readRestaurants() {
-        String selectSQL = "SELECT * FROM restaurant";
+    private static void viewItems() {
+        String selectSQL = "SELECT * FROM menu_items";
 
         try (Connection conn = getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(selectSQL);
                 ResultSet rs = pstmt.executeQuery()) {
 
-            System.out.println("\n--- Restaurant List ---");
-            System.out.printf("%-5s %-20s %-15s %-5s%n", "ID", "Name", "Type", "Rating");
-            System.out.println("------------------------------------------------");
+            System.out.println("\n--- Menu Items ---");
+            System.out.printf("%-15s %-30s %-10s%n", "Serial Number", "Item Name", "Price");
+            System.out.println("----------------------------------------------------------");
             while (rs.next()) {
-                int id = rs.getInt("id");
-                String name = rs.getString("name");
-                String type = rs.getString("type");
-                double rating = rs.getDouble("rating");
-                System.out.printf("%-5d %-20s %-15s %-5.1f%n", id, name, type, rating);
+                int serial = rs.getInt("serial_number");
+                String name = rs.getString("item_name");
+                double price = rs.getDouble("price");
+                System.out.printf("%-15d %-30s %-10.2f%n", serial, name, price);
             }
         } catch (SQLException e) {
             System.err.println("Error reading data: " + e.getMessage());
         }
     }
 
-    private static void updateRestaurant(Scanner scanner) {
-        int id = -1;
-        while (id == -1) {
-            System.out.print("Enter Restaurant ID to update: ");
+    private static void updateItem(Scanner scanner) {
+        int serial = -1;
+        while (serial == -1) {
+            System.out.print("Enter Serial Number to update: ");
             try {
                 if (!scanner.hasNextLine())
                     return;
                 String input = scanner.nextLine().trim();
                 if (input.isEmpty())
                     continue;
-                id = Integer.parseInt(input);
+                serial = Integer.parseInt(input);
             } catch (NumberFormatException e) {
-                System.out.println("Invalid ID.");
+                System.out.println("Invalid Serial Number.");
             }
         }
 
         System.out.println("What do you want to update?");
-        System.out.println("1. Name");
-        System.out.println("2. Type");
-        System.out.println("3. Rating");
-        System.out.println("4. Cancel");
+        System.out.println("1. Item Name");
+        System.out.println("2. Price");
+        System.out.println("3. Cancel");
         System.out.print("Enter choice: ");
 
         int choice = -1;
@@ -247,37 +241,32 @@ public class RestaurantManager {
 
         switch (choice) {
             case 1:
-                System.out.print("Enter New Name: ");
+                System.out.print("Enter New Item Name: ");
                 if (!scanner.hasNextLine())
                     return;
                 String name = scanner.nextLine();
-                executeUpdate("UPDATE restaurant SET name = ? WHERE id = ?", name, id);
+                executeUpdate("UPDATE menu_items SET item_name = ? WHERE serial_number = ?", name, serial);
                 break;
             case 2:
-                System.out.print("Enter New Type: ");
-                if (!scanner.hasNextLine())
-                    return;
-                String type = scanner.nextLine();
-                executeUpdate("UPDATE restaurant SET type = ? WHERE id = ?", type, id);
-                break;
-            case 3:
-                double rating = -1;
-                while (rating < 0 || rating > 5) {
-                    System.out.print("Enter New Rating (0-5): ");
+                double price = -1;
+                while (price < 0) {
+                    System.out.print("Enter New Price: ");
                     try {
                         if (!scanner.hasNextLine())
                             return;
                         String input = scanner.nextLine().trim();
                         if (input.isEmpty())
                             continue;
-                        rating = Double.parseDouble(input);
+                        price = Double.parseDouble(input);
+                        if (price < 0)
+                            System.out.println("Price cannot be negative.");
                     } catch (NumberFormatException e) {
                         System.out.println("Invalid number.");
                     }
                 }
-                executeUpdate("UPDATE restaurant SET rating = ? WHERE id = ?", rating, id);
+                executeUpdate("UPDATE menu_items SET price = ? WHERE serial_number = ?", price, serial);
                 break;
-            case 4:
+            case 3:
                 System.out.println("Update cancelled.");
                 break;
             default:
@@ -285,22 +274,22 @@ public class RestaurantManager {
         }
     }
 
-    private static void deleteRestaurant(Scanner scanner) {
-        int id = -1;
-        while (id == -1) {
-            System.out.print("Enter Restaurant ID to delete: ");
+    private static void deleteItem(Scanner scanner) {
+        int serial = -1;
+        while (serial == -1) {
+            System.out.print("Enter Serial Number to delete: ");
             try {
                 if (!scanner.hasNextLine())
                     return;
                 String input = scanner.nextLine().trim();
                 if (input.isEmpty())
                     continue;
-                id = Integer.parseInt(input);
+                serial = Integer.parseInt(input);
             } catch (NumberFormatException e) {
-                System.out.println("Invalid ID.");
+                System.out.println("Invalid Serial Number.");
             }
         }
 
-        executeUpdate("DELETE FROM restaurant WHERE id = ?", id);
+        executeUpdate("DELETE FROM menu_items WHERE serial_number = ?", serial);
     }
 }

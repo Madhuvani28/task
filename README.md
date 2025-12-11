@@ -1,43 +1,39 @@
-# Restaurant Management System (JDBC CRUD)
+# Restaurant Management System (Standalone)
 
-This is a Java program that performs CRUD (Create, Read, Update, Delete) operations on a MySQL database using JDBC and Prepared Statements. It is managed using **Maven**.
+This project is a Java-based Restaurant Management System that connects to a MySQL database. It is built with Maven and includes all necessary dependencies in a single executable JAR file.
 
 ## Prerequisites
 
-1. **Java Development Kit (JDK)**: Ensure Java (17 or later) is installed.
-2. **Maven**: Ensure Maven is installed and available in your PATH.
-3. **MySQL Server**: You need a running MySQL server.
+1.  **Java Runtime Environment (JRE) or JDK**: Version 17 or higher.
+2.  **MySQL Server**: Ensure your MySQL server is running.
+    *   The app will attempt to connect with user `root` and password `password`.
+    *   If that fails, it will **prompt you** to enter your own credentials.
+    *   It will automatically create the `restaurant_db` database if it doesn't exist.
 
-## Setup
+## How to Build (Optional)
 
-1. **Database Creation**:
-   Login to your MySQL server and create the database:
-   ```sql
-   CREATE DATABASE restaurant_db;
-   ```
+If you have the source code and Maven installed, you can rebuild the project:
 
-2. **Configuration**:
-   Open `src/main/java/RestaurantManager.java` and update the constants with your MySQL credentials:
-   ```java
-   private static final String USER = "root";
-   private static final String PASSWORD = "your_password";
-   ```
+```bash
+mvn clean package
+```
 
-## Running the Application
+This generates `target/restaurant-manager-1.0-SNAPSHOT.jar`.
 
-This project uses Maven to handle dependencies (like the MySQL JDBC driver) automatically.
+## How to Run
 
-1. **Open the Terminal** in the project directory (`e:/JFS-42/task`).
+You can run the application directly using the JAR file. No external classpath setup is needed.
 
-2. **Run the Project**:
-   Execute the following command:
-   ```bash
-   mvn clean compile exec:java
-   ```
+**Run command:**
+
+```bash
+java -jar target/restaurant-manager-1.0-SNAPSHOT.jar
+```
 
 ## Features
 
-- **Insert Restaurant**: Add a new restaurant.
-- **Read Restaurants**: List all restaurants.
-- **Update Restaurant**: Update a restaurant's rating.
-- **Delete Restaurant**: Remove a restaurant.
+*   **Insert Restaurant**: Add Name, Cuisine Type, and Rating.
+*   **Read Restaurants**: View all stored restaurants.
+*   **Update Restaurant**: Modify specific fields (Name, Type, Rating) by ID.
+*   **Delete Restaurant**: Remove a restaurant by ID.
+*   **Auto-Configuration**: Automatically prompts for DB credentials if default ones fail.
